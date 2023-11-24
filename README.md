@@ -1,4 +1,10 @@
-# Peerswap
+# Peerswap Playground
+
+This playground priovides a docker stack that comprises of bitcoind, elementsd, 2x lnd nodes and 2x peerswap clients. It connects everything toether, initialises the wallets, and creates a channel between the two nodes.
+
+You can use this to get familiar with [Peerswaps](https://www.peerswap.dev/).
+
+## Usage
 
 **Start nodes:**
 
@@ -36,7 +42,7 @@ CHANID=$(./bin/lncli lnd1 listchannels | jq -r --arg pubkey "$PUBKEY" '.channels
 ./bin/elements-cli -rpcwallet=peerswap1 -generate 3
 ```
 
-**Wait ~10 seconds...**
+**Wait ~10 seconds...**	
 
 ```sh
 sleep 10
@@ -60,9 +66,6 @@ sleep 10
 
 ```sh
 ./bin/lncli lnd1 listchannels | grep -A 3 $CHANID
-```
-
-```sh
 ./bin/lncli lnd2 listchannels | grep -A 3 $CHANID
 ```
 
