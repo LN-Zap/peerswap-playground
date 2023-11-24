@@ -1,0 +1,97 @@
+version: "3.9"
+
+services:
+
+  bitcoind:
+    image: lncm/bitcoind:v25.1
+    restart: unless-stopped
+    networks:
+        testing_net:
+            ipv4_address: 172.29.1.1
+    volumes:
+      - "bitcoind:/data/.bitcoin"
+      - "./conf/bitcoind/bitcoin.conf:/data/.bitcoin/bitcoin.conf"
+
+  elementsd:
+    image: blockstream/elementsd:22.1.1
+    restart: unless-stopped
+    networks:
+        testing_net:
+            ipv4_address: 172.29.1.2
+    command: elementsd
+    volumes:
+      - "elementsd:/root/.elements"
+      - "./conf/elementsd/elements.conf:/root/.elements/elements.conf"
+
+  lnd1:
+    image: lightninglabs/lnd:v0.17.2-beta
+    restart: unless-stopped
+    depends_on:
+      - bitcoind
+    networks:
+        testing_net:
+            ipv4_address: 172.29.1.3
+    command: lnd --externalip=172.29.1.3 --externalip=lnd1:9735 --tlsextradomain=lnd1 --alias=lnd1
+    volumes:
+      - "lnd1:/root/.lnd"
+      - "./conf/lnd/lnd.conf:/root/.lnd/lnd.conf"
+
+  peerswap1:
+    image: lnzap/peerswapd:latest
+    restart: unless-stopped
+    depends_on:
+      - lnd1
+      - elementsd
+    networks:
+        testing_net:
+            ipv4_address: 172.29.1.4
+    command: elementsd --lnd.host=lnd1:10009 --elementsd.rpcwallet=peerswap1 --host=localhost:42069
+    volumes:
+      - "lnd1:/root/.lnd"
+      - "peerswap1:/root/.peerswap"
+      - "./conf/peerswapd/policy.conf:/root/.peerswap/policy.conf"
+      - "./conf/peerswapd/peerswap.conf:/root/.peerswap/peerswap.conf"
+
+  lnd2:
+    image: lightninglabs/lnd:v0.17.2-beta
+    restart: unless-stopped
+    depends_on:
+      - bitcoind
+    networks:
+        testing_net:
+            ipv4_address: 172.29.1.5
+    command: lnd --externalip=172.29.1.5 --externalip=lnd2:9735 --tlsextradomain=lnd2 --alias=lnd2
+    volumes:
+      - "lnd2:/root/.lnd"
+      - "./conf/lnd/lnd.conf:/root/.lnd/lnd.conf"
+
+  peerswap2:
+    image: lnzap/peerswapd:latest
+    restart: unless-stopped
+    depends_on:
+      - lnd2
+      - elementsd
+    networks:
+        testing_net:
+            ipv4_address: 172.29.1.6
+    command: elementsd --lnd.host=lnd2:10009 --elementsd.rpcwallet=peerswap2 --host=0.0.0.0:42069
+    volumes:
+      - "lnd2:/root/.lnd"
+      - "peerswap2:/root/.peerswap"
+      - "./conf/peerswapd/policy.conf:/root/.peerswap/policy.conf"
+      - "./conf/peerswapd/peerswap.conf:/root/.peerswap/peerswap.conf"
+
+volumes:
+    bitcoind:
+    elementsd:
+    lnd1:
+    peerswap1:
+    lnd2:
+    peerswap2:
+
+networks:
+    testing_net:
+        ipam:
+            driver: default
+            config:
+                - subnet: 172.29.0.0/16

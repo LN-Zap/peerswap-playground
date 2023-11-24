@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+docker exec peerswap-playground-elementsd-1 elements-cli "$@"

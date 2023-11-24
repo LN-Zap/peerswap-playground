@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+docker exec peerswap-playground-$1-1 pscli "${@:2}" || echo "Usage: pscli {NodeName, e.g. peerswap1} {pscli command, e.g. listswaps}"
