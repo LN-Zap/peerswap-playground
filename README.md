@@ -1,6 +1,6 @@
 # Peerswap Playground
 
-This playground priovides a docker stack that comprises of bitcoind, elementsd, 2x lnd nodes and 2x peerswap clients. It connects everything toether, initialises the wallets, and creates a channel between the two nodes.
+This PeerSwap Playground provides a docker stack that comprises bitcoind, elementsd, 2x lnd nodes and 2x peerswap clients. It connects everything together, initializes the wallets, and creates a channel between the two nodes.
 
 You can use this to get familiar with [Peerswaps](https://www.peerswap.dev/).
 
