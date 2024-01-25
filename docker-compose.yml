@@ -45,7 +45,7 @@ services:
     networks:
         testing_net:
             ipv4_address: 172.29.1.4
-    command: elementsd --lnd.host=lnd1:10009 --elementsd.rpcwallet=peerswap1 --host=localhost:42069
+    command: --lnd.host=lnd1:10009 --elementsd.rpcwallet=peerswap1 --host=localhost:42069
     volumes:
       - "lnd1:/root/.lnd"
       - "peerswap1:/root/.peerswap"
@@ -74,7 +74,7 @@ services:
     networks:
         testing_net:
             ipv4_address: 172.29.1.6
-    command: elementsd --lnd.host=lnd2:10009 --elementsd.rpcwallet=peerswap2 --host=0.0.0.0:42069
+    command: --lnd.host=lnd2:10009 --elementsd.rpcwallet=peerswap2 --host=0.0.0.0:42069
     volumes:
       - "lnd2:/root/.lnd"
       - "peerswap2:/root/.peerswap"
