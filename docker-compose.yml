@@ -6,8 +6,8 @@ services:
     image: lncm/bitcoind:v25.1
     restart: unless-stopped
     networks:
-        testing_net:
-            ipv4_address: 172.29.1.1
+      testing_net:
+        ipv4_address: 172.29.1.1
     volumes:
       - "bitcoind:/data/.bitcoin"
       - "./conf/bitcoind/bitcoin.conf:/data/.bitcoin/bitcoin.conf"
@@ -16,8 +16,8 @@ services:
     image: blockstream/elementsd:22.1.1
     restart: unless-stopped
     networks:
-        testing_net:
-            ipv4_address: 172.29.1.2
+      testing_net:
+        ipv4_address: 172.29.1.2
     command: elementsd
     volumes:
       - "elementsd:/root/.elements"
@@ -29,8 +29,8 @@ services:
     depends_on:
       - bitcoind
     networks:
-        testing_net:
-            ipv4_address: 172.29.1.3
+      testing_net:
+        ipv4_address: 172.29.1.3
     command: lnd --externalip=172.29.1.3 --externalip=lnd1:9735 --tlsextradomain=lnd1 --alias=lnd1
     volumes:
       - "lnd1:/root/.lnd"
@@ -43,8 +43,8 @@ services:
       - lnd1
       - elementsd
     networks:
-        testing_net:
-            ipv4_address: 172.29.1.4
+      testing_net:
+        ipv4_address: 172.29.1.4
     command: --lnd.host=lnd1:10009 --elementsd.rpcwallet=peerswap1 --host=localhost:42069
     volumes:
       - "lnd1:/root/.lnd"
@@ -58,8 +58,8 @@ services:
     depends_on:
       - bitcoind
     networks:
-        testing_net:
-            ipv4_address: 172.29.1.5
+      testing_net:
+        ipv4_address: 172.29.1.5
     command: lnd --externalip=172.29.1.5 --externalip=lnd2:9735 --tlsextradomain=lnd2 --alias=lnd2
     volumes:
       - "lnd2:/root/.lnd"
@@ -72,26 +72,51 @@ services:
       - lnd2
       - elementsd
     networks:
-        testing_net:
-            ipv4_address: 172.29.1.6
+      testing_net:
+        ipv4_address: 172.29.1.6
     command: --lnd.host=lnd2:10009 --elementsd.rpcwallet=peerswap2 --host=0.0.0.0:42069
     volumes:
       - "lnd2:/root/.lnd"
       - "peerswap2:/root/.peerswap"
       - "./conf/peerswapd/policy.conf:/root/.peerswap/policy.conf"
       - "./conf/peerswapd/peerswap.conf:/root/.peerswap/peerswap.conf"
+  cln1:
+    build:
+      context: .
+      dockerfile: ./dockerfile
+    restart: unless-stopped
+    depends_on:
+      - bitcoind
+      - elementsd
+    networks:
+      testing_net:
+        ipv4_address: 172.29.1.7
+    command:
+      - --bitcoin-rpcconnect=bitcoind
+      - --bitcoin-rpcport=43782
+      - --bitcoin-rpcuser=user
+      - --bitcoin-rpcpassword=pass
+      - --network=regtest
+      - --log-level=debug
+      - --plugin=/usr/local/libexec/c-lightning/plugins/peerswap
+    volumes:
+      - "cln1:/root/.peerswap"
+      - "./conf/peerswap/peerswap.conf:/root/.lightning/regtest/peerswap/peerswap.conf"
+      - "./conf/peerswap/policy.conf:/root/.lightning/regtest/peerswap/policy.conf"
 
 volumes:
-    bitcoind:
-    elementsd:
-    lnd1:
-    peerswap1:
-    lnd2:
-    peerswap2:
+  bitcoind:
+  elementsd:
+  lnd1:
+  peerswap1:
+  lnd2:
+  peerswap2:
+  cln1:
+
 
 networks:
-    testing_net:
-        ipam:
-            driver: default
-            config:
-                - subnet: 172.29.0.0/16
+  testing_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.29.0.0/16
